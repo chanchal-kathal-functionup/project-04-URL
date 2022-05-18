@@ -16,6 +16,8 @@ const createUrl=async function(req,res){
     try{
        let requestBody = req.body
        let longUrl =requestBody.longUrl
+
+       const baseUrl = "https://localhost:3000"
        if(!isValidRequestBody(requestBody)){
            return res.status(400).send({status:false,message:"Invalid request parameter  please provide data insite body"})
        }
@@ -27,12 +29,16 @@ const createUrl=async function(req,res){
         if (!validLongUrl) {
             return res.status(400).send({ status: false, msg: "Please provide a valid longUrl" })
         }
-        const checkUrl = await urlModel.find(longUrl)
+        const checkUrl = await urlModel.findOne({longUrl})
         if(checkUrl){
-            return res.status(400).send({status:false,message:"This Url is Already exist"})
+            return res.status(400).send({status:false,message:"This Url is Already exist", data :checkUrl})
         }
+
         const urlCode= shortid.generate().toLowerCase()
+
         const shortUrl= baseUrl + '/' + urlCode
+
+
 
         const urlbody={longUrl,shortUrl,urlCode}
 
