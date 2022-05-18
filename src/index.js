@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 const mongoose = require('mongoose')
-mongoose.connect("mongodb+srv://functionUpUranium-2:JECVxS0v96bKoG0a@cluster0.j1yrl.mongodb.net/InternProject2-DB", { useNewUrlParser: true })
+mongoose.connect("mongodb+srv://functionUpUranium-2:JECVxS0v96bKoG0a@cluster0.j1yrl.mongodb.net/project-04group107-DB", { useNewUrlParser: true })
     .then(() => console.log('mongodb is successfully connected'))
     .catch(err => console.log(err))
 
