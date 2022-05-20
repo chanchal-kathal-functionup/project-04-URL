@@ -40,10 +40,14 @@ const createUrl=async function(req,res){
        let requestBody = req.body
        let longUrl =requestBody.longUrl
 
-       const baseUrl = "https://localhost:3000"
+       
        if(!isValidRequestBody(requestBody)){
            return res.status(400).send({status:false,message:"Invalid request parameter  please provide data insite body"})
        }
+       const baseUrl = "https://localhost:3000"
+       if (!(/^https?:\/\/\w/).test(baseUrl)) {
+        return res.status(400).send({ status: false, msg: "Please check your Base Url, Provide a valid One." })
+    }
       if(!isValid(longUrl)){
           return res.status(400).send({status:false,message:"Please provide longUrl"})
         }
