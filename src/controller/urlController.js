@@ -94,20 +94,7 @@ const createUrl=async function(req,res){
     }
 
 }
-// const getUrl = async function (req, res) {
-//     try {
-//         let urlCode = req.params.urlCode
 
-//         let findUrl = await urlModel.find({ urlCode: urlCode }).select({longUrl:1})
-//         if (!findUrl)
-//             return res.status(404).send({ status: false, message: 'URL not found.' })
-
-//         res.status(200).send({ status: true, message: 'Redirecting to Original URL.', data: findUrl})
-
-//     } catch (err) {
-//         res.status(500).send({ status: false, message: err.message })
-//     }
-// }
 
 const getUrl = async function (req, res) {
     try {
