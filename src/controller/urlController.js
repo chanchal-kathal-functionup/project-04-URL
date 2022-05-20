@@ -6,11 +6,11 @@ const { promisify } = require("util");
 const  util =require("util")
 
 const redisClient = redis.createClient(
-    13190,
-    "redis-13190.c301.ap-south-1-1.ec2.cloud.redislabs.com",
+    10123,
+    "redis-10123.c244.us-east-1-2.ec2.cloud.redislabs.com",
     { no_ready_check: true }
   );
-  redisClient.auth("gkiOIPkytPI3ADi14jHMSWkZEo2J5TDG", function (err) {
+  redisClient.auth("qPW04s20Rjc9GRpAuBm1MgCiKrcbvVnX", function (err) {
     if (err) throw err;
   });
   
@@ -61,6 +61,18 @@ const createUrl=async function(req,res){
 
         const shortUrl= baseUrl + '/' + urlCode
 
+        let cachedUrl = await GET_ASYNC(`${longUrl}`)
+        if (cachedUrl) {
+            let url = JSON.parse(cachedUrl)
+            return res.status(200).send({ status: true, message: "data from redis", redisData: url })
+        }
+
+        let dbCallUrl = await urlModel.findOne({ longUrl })
+        if (dbCallUrl) {
+            await SET_ASYNC(`${longUrl}`, JSON.stringify(dbCallUrl))
+            return res.status(200).send({ status: false, message: "data from db", data: dbCallUrl })
+        }
+
 
 
         const urlbody={longUrl,shortUrl,urlCode}
@@ -72,8 +84,9 @@ const createUrl=async function(req,res){
             shortUrl:save.shortUrl,
             urlCode:save.urlCode
         }
-        return res.status(302).send({status:true,data:urlData})
-    }
+        await SET_ASYNC(`${longUrl}`, JSON.stringify(urlData))
+        return res.status(201).send({ status: true, data: urlData })
+ }
      
 
     catch(error){
@@ -81,20 +94,46 @@ const createUrl=async function(req,res){
     }
 
 }
+// const getUrl = async function (req, res) {
+//     try {
+//         let urlCode = req.params.urlCode
+
+//         let findUrl = await urlModel.find({ urlCode: urlCode }).select({longUrl:1})
+//         if (!findUrl)
+//             return res.status(404).send({ status: false, message: 'URL not found.' })
+
+//         res.status(200).send({ status: true, message: 'Redirecting to Original URL.', data: findUrl})
+
+//     } catch (err) {
+//         res.status(500).send({ status: false, message: err.message })
+//     }
+// }
+
 const getUrl = async function (req, res) {
     try {
         let urlCode = req.params.urlCode
 
-        let findUrl = await urlModel.find({ urlCode: urlCode }).select({longUrl:1})
-        if (!findUrl)
-            return res.status(404).send({ status: false, message: 'URL not found.' })
+        if (!isValid(urlCode)) {
+            return res.status(400).send({ status: false, message: "Urlcode is not present" })
+        }
 
-        res.status(200).send({ status: true, message: 'Redirecting to Original URL.', data: findUrl})
+        //checking url in cache server memory
+        const isUrlCached = await GET_ASYNC(`${urlCode}`)
+        if (isUrlCached) return res.status(302).redirect(JSON.parse(isUrlCached).longUrl)
 
-    } catch (err) {
-        res.status(500).send({ status: false, message: err.message })
+        //saving Url in cache server memory
+        const isAlreadyUrlInDb = await urlModel.findOne({ urlCode: urlCode })
+        if (!isAlreadyUrlInDb) return res.status(404).send({ status: false, message: "Unable to find URL to redirect to....." })
+
+        await SET_ASYNC(`${urlCode}`, JSON.stringify(isAlreadyUrlInDb))
+        return res.status(302).redirect(isAlreadyUrlInDb.longUrl);
+    }
+    catch (err) {
+        return res.status(500).send({ status: false, error: err.message })
     }
 }
+
+
 
 
 
