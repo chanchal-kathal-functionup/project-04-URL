@@ -56,10 +56,10 @@ const createUrl=async function(req,res){
         if (!validLongUrl) {
             return res.status(400).send({ status: false, msg: "Please provide a valid longUrl" })
         }
-        const checkUrl = await urlModel.findOne({longUrl})
-        if(checkUrl){
-            return res.status(400).send({status:false,message:"This Url is Already exist", data :checkUrl})
-        }
+        // const checkUrl = await urlModel.findOne({longUrl})
+        // if(checkUrl){
+        //     return res.status(200).send({status:false,message:"This Url is Already exist", data :checkUrl})
+        // }
 
         const urlCode= shortid.generate().toLowerCase()
 
